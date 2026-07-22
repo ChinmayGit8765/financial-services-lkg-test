@@ -7,10 +7,15 @@ the JSON below and re-enforces the flag gate at render time.
 ## Document structure
 
 **Header block** — date · run time · sources scanned count ·
-`DRAFT — for review by [name]`.
+`DRAFT — for review by [name]` (rendered red), followed by an **At a glance**
+paragraph — flag count by audience and severity, top item, Watchlist count —
+assembled deterministically from the gated JSON, never model prose.
 
-1. **Flagged items** — urgent, cross-sector, board-relevant first (sort: severity
-   desc, then owner board/QLC before GM). Full flag schema rendered per item.
+1. **Flagged items** — grouped **For the Board / For QLC / For the GM**,
+   severity-sorted within each group with colour-coded severity tags. Key
+   numbers render bold; the source renders as a hyperlinked label (originator
+   name for primaries — Cotality, ABS, ACCC — bare domain for secondaries),
+   never a raw URL.
 2. **Macro dashboard** — rates, housing, sentiment. Each row: indicator, delta,
    sectors touched. Deltas/threshold-crossings only.
 3. **Sector sections** — one per registry sector (today: bedding & furniture,
@@ -20,9 +25,9 @@ the JSON below and re-enforces the flag gate at render time.
 5. **Assumptions appendix** — sources used and why; what substitutes for broker
    research (public news + ASX announcements); any synthetic elements; known
    blind spots without licensed connectors (CapIQ/FactSet); source-recency window.
-6. **Reviewer decisions** — one row per gated flag: Flag · Decision
-   (Promote / Reject / Amend, left blank) · Reviewer comment (left blank),
-   then a signature block. The renderer emits this section empty by design —
+6. **Reviewer decisions** — one row per gated flag: shortened flag reference ·
+   ☐ Promote / ☐ Reject / ☐ Amend checkboxes · Reviewer comment (left blank),
+   then a signature block. The renderer emits this section unfilled by design —
    only the named human completes it, and no item in section 1 is distributed
    until its row is.
 
