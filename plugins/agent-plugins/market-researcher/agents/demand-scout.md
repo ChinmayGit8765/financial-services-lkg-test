@@ -49,5 +49,9 @@ One array, max 10 items, each in the digest's candidate-item shape:
   `rates-sentiment`, or `seasonality`. A signal you cannot map to one of those is
   not a candidate — drop it, don't invent a mechanism.
 - Every item carries the URL you actually retrieved or saw in search results.
+- **Cite the originator.** If a figure comes from Cotality, ABS, Westpac–MI, or
+  another primary publisher, `source_url` is the originator's release — never a
+  commentary or aggregator page that syndicates it. A figure you can only find
+  syndicated is a weaker candidate; say so in `summary`.
 - No free text, no markdown, no commentary outside the array. Nothing found →
   `[]` (an empty run is a valid result, not a failure).

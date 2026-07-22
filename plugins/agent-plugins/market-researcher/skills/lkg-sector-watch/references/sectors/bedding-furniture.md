@@ -35,6 +35,10 @@ ASX-listed names are the filings spine — scan their announcement pages first.
    moving activity, first-home-buyer lending, renovation approvals — the
    upstream events that put a mattress or a bedroom suite on a shopping list
 
+**Prefer primary sources** — ACCC, Cotality, ABS, Westpac IQ, ASX announcements —
+over aggregators, law-firm summaries, and property-commentary sites; a figure
+available from its originator is cited from its originator.
+
 ## Encoded linkages (mechanism IDs — frozen)
 
 Context the agent applies; never forecasts it makes. Report signal + mechanism +
