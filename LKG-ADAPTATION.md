@@ -43,9 +43,11 @@ is expected to grow this way: audit output, close the gap in code, not prose.
 - `52d5416` — fixed a real Windows bug in the repo's own `version_bump.py`
   (backslashed paths broke `git show ref:path`; the pre-commit hook silently
   never bumped and `--check` false-passed locally while Linux CI would fail).
-- `6705c0a` — marketplace renamed to `lkg-financial-services`: Claude Code
-  reserves official marketplace names for `github.com/anthropics` repos — a
-  supply-chain guardrail this fork hit and complied with.
+- `6705c0a` — marketplace renamed to `lkg-financial-services` after hitting
+  Claude Code's supply-chain guardrail on install (observed verbatim):
+  *"Failed to add marketplace: The name 'claude-for-financial-services' is
+  reserved for official Anthropic marketplaces. Only repositories from
+  'github.com/anthropics/' can use this name."*
 
 ## Deliberately not built
 
