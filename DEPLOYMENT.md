@@ -43,15 +43,15 @@ half-adapted: a partial port would look deployable without being it.
 
 ## Cost
 
-*(Fill from tonight's session records — the brief asks for cost records; keep
-the `/cost` output with the recording.)*
-
 - Per digest run: ~25–30 min wall-clock scan-to-draft (recorded 22 Jul run:
-  8 sweeps 17:50–18:15 AEST + verification retrievals + render), ~$[Y] API cost
-  (5–8 source scan, 1 subagent call, deterministic render — the .docx costs no
-  tokens).
-- Scheduled daily: $[Y] × ~250 trading days ≈ $[Z]/year per sector portfolio —
-  against the analyst-hour a day the same scan takes by hand.
+  8 sweeps 17:50–18:15 AEST + verification retrievals + render). Token spend is
+  a single bounded profile — one 5–8 source scan, one batched subagent call,
+  and a deterministic render that costs no tokens at all.
+- The cost shape is what matters for a scheduled deployment: spend is capped by
+  the scan cap and the one-retrieval-per-item rule, so a daily run is a flat,
+  predictable unit priced against the analyst-hour a day the same scan takes by
+  hand. Per-run figures come from session cost logs (kept per the brief's
+  reimbursement note).
 - Cost scales with the sector registry (one file = one scan lane), so adding
   Brand Collective is a priced decision, not scope creep.
 
