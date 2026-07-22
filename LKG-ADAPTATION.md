@@ -3,7 +3,8 @@
 This fork adapts Anthropic's `market-researcher` template into the **LKG Portfolio
 Sector Digest** for the LKG Group AI & Automation Specialist final interview.
 Every brief constraint maps to a commit and file below; the walkthrough is
-`git log 4aa51ed..HEAD` read top to bottom.
+`git log 4aa51ed..HEAD` read top to bottom. To install and run it, see
+[RUN-GUIDE.md](RUN-GUIDE.md).
 
 ## Brief constraint → where it's satisfied
 

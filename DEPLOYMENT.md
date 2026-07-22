@@ -3,6 +3,7 @@
 How the adapted `market-researcher` runs beyond the demo. Two shapes, one
 source: the plugin and the Managed Agent cookbook wrap the same system prompt
 and skills, so choosing a surface is a governance decision, not a rebuild.
+Hands-on install/run/verify steps are in [RUN-GUIDE.md](RUN-GUIDE.md).
 
 ## Cowork plugin vs Managed Agent
 
