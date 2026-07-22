@@ -1,7 +1,8 @@
 {
-  "name": "claude-for-financial-services",
+  "name": "lkg-financial-services",
+  "description": "LKG Group adaptation of Anthropic's financial-services templates — market-researcher tuned into the daily LKG Portfolio Sector Digest",
   "owner": {
-    "name": "Matt Piccolella"
+    "name": "Chinmay Purohit"
   },
   "plugins": [
     {
