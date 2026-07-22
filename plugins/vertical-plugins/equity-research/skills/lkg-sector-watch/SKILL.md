@@ -13,7 +13,8 @@ them — nothing in this skill's output is a decision, a forecast, or a send.
 
 Sectors live one-per-file under `references/sectors/`. **Adding a sector = adding a
 file** and one row here. The taxonomy inside each file is frozen — do not extend it
-mid-run.
+mid-run. Registry content is compiled from public sources only (news, ASX filings);
+it encodes no internal LKG/QLC data.
 
 | Sector file | Weighting | Depth |
 |---|---|---|
@@ -36,8 +37,10 @@ context the agent *applies* — never forecasts it makes.
   names), then macro, then SECONDARY.
 - Public data only: ASX filings, news, regulator releases, public broker
   commentary. No paywalled or employer data.
-- Record every source consulted (URL + retrieval time) — the count and list go in
-  the digest header and assumptions appendix.
+- Record the source menu swept and the run window in the assumptions appendix;
+  the sweep count goes in the digest header. Every cited item carries its source
+  URL. Verification retrievals (re-fetching a surfaced page to check a claim)
+  are capped at one per candidate item and counted separately from the scan cap.
 
 ### Step 3: Extract candidate items
 
@@ -84,8 +87,11 @@ every flag and demotes any incomplete one to the Watchlist at render time.
 Write the digest JSON (schema in `references/digest-template.md`), then render:
 
 ```
-python scripts/build_digest.py digest.json "LKG-Sector-Digest-<YYYY-MM-DD>.docx"
+python3 scripts/build_digest.py digest.json "LKG-Sector-Digest-<YYYY-MM-DD>.docx"
 ```
+
+(`py -3` on Windows if `python3` doesn't resolve; the script lives in this
+skill's `scripts/` directory — use its full path when running from elsewhere.)
 
 The document is titled **"LKG Portfolio Sector Digest — {date}"** and follows the
 structure in `references/digest-template.md`: Flagged items → Macro dashboard →

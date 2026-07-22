@@ -22,7 +22,7 @@ Every brief constraint maps to a commit and file below; the walkthrough is
 | Sharp-version item | Where |
 |---|---|
 | Skill that knows the players | `skills/lkg-sector-watch/references/sectors/bedding-furniture.md` — player map incl. Snooze/Forty Winks/Nick Scali/Adairs/Domayne, suppliers, ASX filings spine |
-| 5–10 sources per run | Scan capped at 5–8 sources (skill Step 2) — also keeps the live demo inside its 15-minute slot |
+| 5–10 sources per run | Scan capped at 5–8 sources (skill Step 2) — keeps runtime predictable; the recorded 22 Jul end-to-end run took ~25 min scan-to-draft, so the live demo starts the run at the top of the slot and narrates the architecture over it, fallback .docx in hand |
 | Subagent classifying GM vs board audience | `agents/audience-classifier.md` — GM / board / noise + one-line rationale, JSON-only |
 | Sources cited, "why this matters" per item | Flag gate: `source_url` and `implication` are required fields — an item without either cannot be a flag |
 | Deployable thinking | [DEPLOYMENT.md](DEPLOYMENT.md) |

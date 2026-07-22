@@ -16,7 +16,11 @@ and skills, so choosing a surface is a governance decision, not a rebuild.
 Migration path: `audience-classifier` was written to mirror the cookbook's
 `sector-reader` pattern (untrusted input, length-capped, schema-validated JSON),
 so porting it to a subagent YAML with an `output_schema` block is mechanical.
-That is why the cookbook was left untouched rather than half-adapted.
+The port must also widen the cookbook's toolset — as shipped it enables only
+read/grep/glob (no code execution, no subagent calls), so digest mode does not
+run under the CMA wrapper today — and register the classifier in
+`callable_agents`. That is why the cookbook was left untouched rather than
+half-adapted: a partial port would look deployable without being it.
 
 ## Governance & audit
 
@@ -42,8 +46,10 @@ That is why the cookbook was left untouched rather than half-adapted.
 *(Fill from tonight's session records — the brief asks for cost records; keep
 the `/cost` output with the recording.)*
 
-- Per digest run: ~[X] min wall-clock, ~$[Y] API cost (5–8 source scan,
-  1 subagent call, deterministic render — the .docx costs no tokens).
+- Per digest run: ~25–30 min wall-clock scan-to-draft (recorded 22 Jul run:
+  8 sweeps 17:50–18:15 AEST + verification retrievals + render), ~$[Y] API cost
+  (5–8 source scan, 1 subagent call, deterministic render — the .docx costs no
+  tokens).
 - Scheduled daily: $[Y] × ~250 trading days ≈ $[Z]/year per sector portfolio —
   against the analyst-hour a day the same scan takes by hand.
 - Cost scales with the sector registry (one file = one scan lane), so adding
@@ -68,6 +74,10 @@ without passing the gate *and* a person.
   MCP tool allowlist (`mcp__capiq__*`, `mcp__factset__*` are already declared).
 - Outlook add-in not GA at the May-2026 launch — output targets Word, not
   email, by design.
+- The digest renders a headless .docx rather than driving live Word through
+  the M365 add-in: the deterministic flag gate runs at render time, and a
+  live-document editing flow would bypass it. The add-in remains the right
+  surface for the template's interactive primer documents.
 - Brand Collective sector file is a stub until its taxonomy is reviewed —
   sectors are onboarded deliberately so the gate never runs on unvetted
   mechanism IDs.

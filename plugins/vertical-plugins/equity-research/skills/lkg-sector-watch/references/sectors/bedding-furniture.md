@@ -1,6 +1,8 @@
 # Sector: Australian bedding & furniture retail
 
 **Weighting:** risk-weighted · **Depth:** PRIMARY — full scan every run.
+**Provenance:** player map and linkages compiled from public sources (news, ASX
+filings); nothing here draws on internal Hypnos/QLC data.
 LKG exposure: Hypnos Group (QLC portfolio) — Snooze + FutureSleep + G&G Furniture,
 Australia's largest vertically-integrated bedding/furniture retailer. **Snooze is a
 franchise network** — franchise-system news anywhere in Australian retail is
