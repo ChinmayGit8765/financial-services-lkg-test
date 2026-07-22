@@ -31,6 +31,9 @@ ASX-listed names are the filings spine — scan their announcement pages first.
 3. ACCC media releases + franchising news (Snooze network risk)
 4. ABS housing / CoreLogic turnover release (macro)
 5. RBA decisions + Westpac–MI consumer sentiment (macro)
+6. Demand-signals lane (run via the `demand-scout` subagent): new-homeowner and
+   moving activity, first-home-buyer lending, renovation approvals — the
+   upstream events that put a mattress or a bedroom suite on a shopping list
 
 ## Encoded linkages (mechanism IDs — frozen)
 

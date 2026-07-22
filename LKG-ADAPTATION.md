@@ -11,7 +11,7 @@ Every brief constraint maps to a commit and file below; the walkthrough is
 | Brief requirement | Satisfied by |
 |---|---|
 | **Start from the Anthropic template, don't rebuild** | Fork of `anthropics/financial-services`; upstream history intact below `4aa51ed`. All changes are additive commits on top — the template's primer workflow still runs unmodified. |
-| **At least one meaningful adaptation** | Three: new skill `lkg-sector-watch` (`c1367a7`), new subagent `audience-classifier` (`5b1b5d1`), tightened system prompt with LKG digest mode (`5915f85`). |
+| **At least one meaningful adaptation** | Four: new skill `lkg-sector-watch` (`c1367a7`), subagents `audience-classifier` (`5b1b5d1`) and `demand-scout` (adjacent demand-signals lane — the upstream news that moves bedding demand), tightened system prompt with LKG digest mode (`5915f85`). |
 | **Public data only, no employer data** | Skill Step 2 + agent guardrail ("Public data only in digest mode"); related-party rule — Snooze/Hypnos is a QLC holding, public sources only, declared in every digest's assumptions appendix. |
 | **Output lands in a real tool** | Word: `scripts/build_digest.py` renders the digest JSON to `.docx` deterministically (`c1367a7`, hardened `f89e3f1`). |
 | **Human approval point explicit** | Flags are nominations. Skill Step 7 stops for review; every document header carries `DRAFT — for review by [name]`; agent guardrails forbid distribution. |
@@ -24,7 +24,7 @@ Every brief constraint maps to a commit and file below; the walkthrough is
 |---|---|
 | Skill that knows the players | `skills/lkg-sector-watch/references/sectors/bedding-furniture.md` — player map incl. Snooze/Forty Winks/Nick Scali/Adairs/Domayne, suppliers, ASX filings spine |
 | 5–10 sources per run | Scan capped at 5–8 sources (skill Step 2) — keeps runtime predictable; the recorded 22 Jul end-to-end run took ~25 min scan-to-draft, so the live demo starts the run at the top of the slot and narrates the architecture over it, fallback .docx in hand |
-| Subagent classifying GM vs board audience | `agents/audience-classifier.md` — GM / board / noise + one-line rationale, JSON-only |
+| Subagent classifying GM vs board audience | `agents/audience-classifier.md` — GM / board / noise + one-line rationale, JSON-only; GM lens is bedding-specific (promo windows, input costs, demand-side signals that lead the register) |
 | Sources cited, "why this matters" per item | Flag gate: `source_url` and `implication` are required fields — an item without either cannot be a flag |
 | Deployable thinking | [DEPLOYMENT.md](DEPLOYMENT.md) |
 

@@ -39,6 +39,11 @@ context the agent *applies* — never forecasts it makes.
 - **Cap the scan at 5–8 sources** so runtime stays predictable. The whole budget
   goes to the primary sector: take its spine first (ASX announcements of listed
   names), then sector news on the player map, then macro.
+- **Run the demand-signals lane through the `demand-scout` subagent** — the
+  surrounding news that moves bedding demand before the retailers report it:
+  housing turnover, new-homeowner and moving activity, renovation approvals,
+  consumer sentiment. Tell it how many of the capped sources are its lane
+  (usually 2). Its returned items enter Step 3 as candidates like any other.
 - Public data only: ASX filings, news, regulator releases, public broker
   commentary. No paywalled or employer data.
 - Record the source menu swept and the run window in the assumptions appendix;
@@ -82,6 +87,10 @@ those are QLC deal-flow and get `owner: QLC`.
 
 Severity guide: `high` = act-this-week for the owner; `med` = discuss at next
 GM/board touchpoint; `low` = context worth having.
+
+**There is no flag quota or cap.** Every candidate that passes the gate is a
+flag — three on a quiet day, a dozen on a results day. Volume is controlled by
+the gate's required fields and the classifier's noise call, never by a count.
 
 The gate is also enforced mechanically: `scripts/build_digest.py` re-validates
 every flag and demotes any incomplete one to the Watchlist at render time.

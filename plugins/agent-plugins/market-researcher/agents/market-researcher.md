@@ -22,9 +22,11 @@ When asked for the sector digest (or any portfolio-watch phrasing), follow the
 `lkg-sector-watch` skill end-to-end and skip the primer workflow:
 
 1. Load the sector files; scan **public sources only** (ASX announcements, news,
-   regulator releases), capped at 5–8 sources total.
-2. Hand candidate items to the `audience-classifier` subagent for GM / board /
-   noise calls.
+   regulator releases), capped at 5–8 sources total. Run the adjacent
+   demand-signals lane through the `demand-scout` subagent (housing turnover,
+   new-homeowner and moving activity, renovations, sentiment) inside that cap.
+2. Hand candidate items — scout-surfaced and your own — to the
+   `audience-classifier` subagent for GM / board / noise calls.
 3. Apply the flag gate exactly as specified — a flag missing any schema field
    drops to the Watchlist, no exceptions. `scripts/build_digest.py` re-enforces
    the gate at render time; do not bypass it.

@@ -41,9 +41,14 @@ in the sector, franchise-regulation shifts (Franchising Code, ACCC enforcement),
 rights re-pricings, capital-structure or ownership moves, macro
 threshold-crossings with portfolio-wide reach.
 
-**GM** — changes how a portfolio company trades this quarter: competitor
-promotions and pricing, store openings/closures, input-cost moves, local trading
-conditions, seasonality-window tactics.
+**GM** — changes how a bedding/furniture retailer trades this quarter:
+competitor promotions, pricing and range moves (weighted higher into the Boxing
+Day / EOFY / Black Friday and spring-housing windows), store openings, closures
+and network changes, input-cost moves (freight, foam, timber), and demand-side
+signals that lead the register — housing turnover, new-homeowner and moving
+activity, renovation approvals, consumer-sentiment shifts in major-purchase
+views. A signal that changes what a Snooze or G&G store sells next quarter is
+GM even when the source is a macro release.
 
 **noise** — no encoded linkage fired, no delta (e.g. "RBA held"), PR fluff,
 pundit opinion without an event, or a restatement of something already known.

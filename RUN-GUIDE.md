@@ -52,13 +52,18 @@ in order:
    full scan); NBL and Brand Collective are named next candidates, deliberately
    not yet onboarded.
 2. **Source sweep** — capped at 5–8 sources, all on the primary sector; ASX
-   announcements of the listed names first, then sector news, then macro.
+   announcements of the listed names first, then sector news, then macro. The
+   `demand-scout` subagent runs the adjacent demand-signals lane inside that
+   cap (housing turnover, new-homeowner and moving activity, renovations,
+   sentiment).
 3. **Candidate extraction** — each item needs a source URL and, to matter, a
    mechanism ID from the sector file. Macro items only on a delta.
 4. **Audience classification** — one batched `audience-classifier` subagent
-   call returns `GM | board | noise` + rationale per item, JSON only.
+   call returns `GM | board | noise` + rationale per item, JSON only; its GM
+   lens is bedding-specific.
 5. **Flag gate** — seven required fields or the item drops to the Watchlist
-   with the missing field named.
+   with the missing field named. No flag quota: every candidate that passes
+   the gate renders as a flag.
 6. **Render** — digest JSON → `LKG-Sector-Digest-<YYYY-MM-DD>.docx` via
    `scripts/build_digest.py`, which re-runs the gate at render time.
 7. **Stop.** The agent presents the file path and flag count and waits. The

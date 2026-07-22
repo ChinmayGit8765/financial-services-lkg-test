@@ -17,6 +17,8 @@ Hands-on install/run/verify steps are in [RUN-GUIDE.md](RUN-GUIDE.md).
 Migration path: `audience-classifier` was written to mirror the cookbook's
 `sector-reader` pattern (untrusted input, length-capped, schema-validated JSON),
 so porting it to a subagent YAML with an `output_schema` block is mechanical.
+`demand-scout` ports the same way but searches the open web, so its YAML also
+needs WebSearch/WebFetch in the widened toolset described below.
 The port must also widen the cookbook's toolset — as shipped it enables only
 read/grep/glob (no code execution, no subagent calls), so digest mode does not
 run under the CMA wrapper today — and register the classifier in
@@ -59,9 +61,10 @@ half-adapted: a partial port would look deployable without being it.
 ## Human-in-the-loop model
 
 ```
-agent scans → agent nominates candidates → subagent tags audience
+agent + demand-scout scan → agent nominates candidates → classifier tags audience
       → deterministic gate (schema + length) → Watchlist or Flag
-             → named human reviews DRAFT → promotes / rejects
+             → named human completes the Reviewer-decisions table
+                    → Promote / Reject / Amend per flag
 ```
 
 Severity is the escalation contract: `high` = act this week, `med` = next
