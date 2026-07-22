@@ -8,6 +8,35 @@ Watchlist with the failure named — it never renders as a flag.
 
 Usage: python build_digest.py digest.json [output.docx]
 Requires: python-docx  (pip install python-docx)
+
+DESIGN RULES (the "why", so future edits stay on-style)
+-------------------------------------------------------
+1. Headings are navy bands (white uppercase text on NAVY fill). Every section
+   gets a one-line italic grey subtitle explaining what the section is for.
+2. Colour is semantic only: RED = high severity / risk / draft warnings,
+   AMBER = med severity, GREEN = opportunity / up-delta, GREY = low severity /
+   metadata. Body text stays near-black. No decorative colour.
+3. Flag cards are compact 4-line single-column tables:
+     [shaded band]  SEV · AUDIENCE  Headline (bold)
+     Polarity · mechanism            (one metadata line)
+     Why this matters: ...           (literal label — matches the brief)
+     Source: <hyperlinked label>
+   Hairline outer border, no inside borders. Band fill by severity.
+4. No raw URLs in the body — sources are short hyperlinked labels with a
+   trailing " ↗". Full URLs live only in the Appendix (new page, small grey),
+   de-duplicated and tagged with the sections that cite them.
+5. "Why this matters" appears with those literal words everywhere an
+   implication is stated (flag cards and sector bullets).
+6. Watchlist = adjacent items at a glance: visually demoted (smaller, grey,
+   status tag first). Sector detail = core section, full-size text, bold fact
+   line + indented "Why this matters:" line.
+7. Macro dashboard: navy header row, zebra striping, ▲/▼ direction column
+   (green/red). No per-row sector column in a single-sector run.
+8. Reviewer decisions: ☐ Promote / ☐ Reject / ☐ Amend checkboxes per row,
+   truncated flag references (~9 words — §1 carries the full text), red italic
+   "no distribution until completed" line above, sign-off below.
+9. Assumptions & audit trail: small grey text — present but visually
+   subordinate to the flags.
 """
 import json
 import re
@@ -34,14 +63,17 @@ PRIMARY_LABELS = {  # originators get clean names; everything else shows its bar
     "cotality.com.au": "Cotality", "abs.gov.au": "ABS", "accc.gov.au": "ACCC",
     "westpaciq.com.au": "Westpac IQ", "rba.gov.au": "RBA", "asx.com.au": "ASX",
 }
-NUM_RE = re.compile(r"([+\-]?\$?\d[\d,.]*(?:%|bp|bn|m\b)?)")
+MONTHS = {"01": "January", "02": "February", "03": "March", "04": "April",
+          "05": "May", "06": "June", "07": "July", "08": "August",
+          "09": "September", "10": "October", "11": "November",
+          "12": "December"}
 
 
 def gate(flags):
     """Split nominated flags into (passed, demoted-with-reason)."""
     passed, demoted = [], []
     for f in flags:
-        missing = [k for k in REQUIRED if not str(f.get(k, "")).strip()]
+        missing = [k for k in REQUIRED if not str(f.get(k) or "").strip()]
         bad = [k for k, allowed in ENUMS.items()
                if f.get(k) and f[k] not in allowed]
         head = str(f.get("headline", "")).strip()
@@ -53,8 +85,9 @@ def gate(flags):
                 [f"invalid {k}={f[k]!r}" for k in bad] +
                 ([f"headline over {HEADLINE_MAX} chars"] if over else []) +
                 (["headline not one line"] if multiline else []))
-            demoted.append({"headline": f.get("headline", "(no headline)"),
-                            "source_url": f.get("source_url", ""),
+            demoted.append({"headline": str(f.get("headline") or
+                                            "(no headline)"),
+                            "source_url": str(f.get("source_url") or ""),
                             "reason": reason})
         else:
             passed.append(f)
@@ -73,16 +106,32 @@ def source_label(url):
 
 def direction(delta):
     d = delta.strip().lower()
-    if d.startswith(("+", "up")) or d[:24].count("rose"):
-        return "▲"
-    if d.startswith(("-", "down", "below")) or d[:24].count("fell"):
-        return "▼"
+    if d.startswith(("+", "up")) or "rose" in d[:24]:
+        return "up"
+    if d.startswith(("-", "−", "down", "below")) or "fell" in d[:24]:
+        return "down"
     return ""
+
+
+def pretty_date(iso):
+    try:
+        y, m, d = iso.split("-")
+        return f"{int(d)} {MONTHS[m]} {y}"
+    except (ValueError, KeyError):
+        return iso
+
+
+def split_reason(reason):
+    """'failed gate: details' -> ('FAILED GATE', 'details'); free text -> WATCH."""
+    m = re.match(r"^([^:]{3,40}):\s*(.*)$", reason or "")
+    if m:
+        return m.group(1).upper(), m.group(2)
+    return "WATCH", reason or ""
 
 
 def main():
     if len(sys.argv) < 2:
-        sys.exit(__doc__.strip())
+        sys.exit(__doc__.strip().split("\n\nDESIGN RULES")[0])
     data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
     out = sys.argv[2] if len(sys.argv) > 2 else \
         f"LKG-Sector-Digest-{data['date']}.docx"
@@ -92,7 +141,8 @@ def main():
 
     try:
         from docx import Document
-        from docx.shared import Pt, Cm, RGBColor
+        from docx.shared import Pt, RGBColor, Twips
+        from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
         from docx.opc.constants import RELATIONSHIP_TYPE as RT
         from docx.oxml import OxmlElement
         from docx.oxml.ns import qn
@@ -101,260 +151,404 @@ def main():
                  "Gate result: %d flag(s) passed, %d demoted." %
                  (len(flags), len(demoted)))
 
-    BLUE = RGBColor(0x1F, 0x4E, 0x79)
-    RED = RGBColor(0xC0, 0x00, 0x00)
-    GREEN = RGBColor(0x2E, 0x7D, 0x32)
-    AMBER = RGBColor(0xBF, 0x8F, 0x00)
-    GREY = RGBColor(0x59, 0x59, 0x59)
-    SEV_COLOR = {"high": RED, "med": AMBER, "low": GREY}
+    NAVY, AMBER, AMBERBG = "1F3A5F", "B45309", "FDF3E3"
+    GREY, GREYBG, DARKGREY = "6B7280", "F3F4F6", "374151"
+    RED, REDBG = "B91C1C", "FBEAEA"
+    GREEN, LIGHT, DARK = "15803D", "D1D5DB", "111827"
+    LINKBLUE = "1D4ED8"
+    FONT = "Calibri"
+    PAGE = 9706  # A4 width (11906) minus the 1100-twip side margins below
+    SEV_TXT = {"high": RED, "med": AMBER, "low": GREY}
+    SEV_BG = {"high": REDBG, "med": AMBERBG, "low": GREYBG}
+    SEV_LEGEND = {"high": "act this week", "med": "act on this quarter",
+                  "low": "context / monitor"}
+    AUD = {"board": "Board", "GM": "GM", "QLC": "QLC"}
+    POL = {"opportunity": GREEN, "watch": GREY, "risk": RED}
 
-    def hyperlink(par, text, url, size=9):
+    def rgb(hexstr):
+        return RGBColor.from_string(hexstr)
+
+    def run(par, text, size=10, color=DARK, bold=False, italic=False,
+            caps=False):
+        r = par.add_run(text)
+        r.font.name = FONT
+        r.font.size = Pt(size)
+        r.font.color.rgb = rgb(color)
+        r.font.bold = bold
+        r.font.italic = italic
+        if caps:
+            r.font.all_caps = True
+        return r
+
+    def spacing(par, before=0, after=0):
+        par.paragraph_format.space_before = Pt(before)
+        par.paragraph_format.space_after = Pt(after)
+
+    def hyperlink(par, label, url, size=8.5):
         r_id = par.part.relate_to(url, RT.HYPERLINK, is_external=True)
         hl = OxmlElement("w:hyperlink")
         hl.set(qn("r:id"), r_id)
-        run, rpr = OxmlElement("w:r"), OxmlElement("w:rPr")
-        for tag, attr in (("w:color", "1F4E79"), ("w:u", "single"),
-                          ("w:sz", str(size * 2))):
+        r, rpr = OxmlElement("w:r"), OxmlElement("w:rPr")
+        fonts = OxmlElement("w:rFonts")
+        fonts.set(qn("w:ascii"), FONT)
+        fonts.set(qn("w:hAnsi"), FONT)
+        rpr.append(fonts)
+        rpr.append(OxmlElement("w:b"))
+        for tag, val in (("w:color", LINKBLUE), ("w:sz", str(int(size * 2))),
+                         ("w:u", "single")):
             el = OxmlElement(tag)
-            el.set(qn("w:val"), attr)
+            el.set(qn("w:val"), val)
             rpr.append(el)
-        rpr.append(OxmlElement("w:i"))
-        run.append(rpr)
         t = OxmlElement("w:t")
-        t.text = text
-        run.append(t)
-        hl.append(run)
+        t.text = label + " ↗"
+        t.set(qn("xml:space"), "preserve")
+        r.append(rpr)
+        r.append(t)
+        hl.append(r)
         par._p.append(hl)
 
-    def bold_numbers(par, text, size=10, color=None):
-        for piece in NUM_RE.split(text):
-            if not piece:
-                continue
-            r = par.add_run(piece)
-            r.bold = bool(NUM_RE.fullmatch(piece))
-            r.font.size = Pt(size)
-            if color:
-                r.font.color.rgb = color
-        return par
+    def shade_par(par, fill):
+        # shd must precede spacing/ind/jc in pPr per CT_PPr child order
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:val"), "clear")
+        shd.set(qn("w:fill"), fill)
+        par._p.get_or_add_pPr().insert_element_before(
+            shd, "w:tabs", "w:spacing", "w:ind", "w:jc", "w:rPr",
+            "w:sectPr", "w:pPrChange")
 
-    def label_cell(cell, text):
-        r = cell.paragraphs[0].add_run(text)
-        r.bold, r.font.size, r.font.color.rgb = True, Pt(9), GREY
+    def shade_cell(cell, fill):
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:val"), "clear")
+        shd.set(qn("w:fill"), fill)
+        cell._tc.get_or_add_tcPr().insert_element_before(
+            shd, "w:noWrap", "w:tcMar", "w:textDirection", "w:tcFitText",
+            "w:vAlign", "w:hideMark", "w:tcPrChange")
 
-    def source_block(par, url):
-        # hyperlinked short label for the screen, full URL in small grey for
-        # print — a citation must survive on paper
-        hyperlink(par, source_label(url), url)
-        br = par.add_run()
-        br.add_break()
-        r = par.add_run(url)
-        r.font.size, r.font.color.rgb = Pt(7.5), GREY
+    def cell_margins(cell, top=30, bottom=30, left=140, right=140):
+        mar = OxmlElement("w:tcMar")
+        for tag, val in (("top", top), ("left", left), ("bottom", bottom),
+                         ("right", right)):
+            el = OxmlElement(f"w:{tag}")
+            el.set(qn("w:w"), str(val))
+            el.set(qn("w:type"), "dxa")
+            mar.append(el)
+        cell._tc.get_or_add_tcPr().insert_element_before(
+            mar, "w:textDirection", "w:tcFitText", "w:vAlign", "w:hideMark",
+            "w:tcPrChange")
 
-    def set_widths(table, cms):
-        # fixed layout so every table of a kind shares identical column lines
-        table.autofit = False
-        layout = OxmlElement("w:tblLayout")
-        layout.set(qn("w:type"), "fixed")
-        table._tbl.tblPr.append(layout)
+    def table_borders(table, inside=False):
+        borders = OxmlElement("w:tblBorders")
+        for tag in ("top", "left", "bottom", "right", "insideH", "insideV"):
+            el = OxmlElement(f"w:{tag}")
+            if tag.startswith("inside") and not inside:
+                el.set(qn("w:val"), "none")
+                el.set(qn("w:sz"), "0")
+            else:
+                el.set(qn("w:val"), "single")
+                el.set(qn("w:sz"), "4")
+                el.set(qn("w:color"), LIGHT)
+            borders.append(el)
+        table._tbl.tblPr.insert_element_before(
+            borders, "w:shd", "w:tblLayout", "w:tblCellMar", "w:tblLook",
+            "w:tblCaption", "w:tblDescription", "w:tblPrChange")
+
+    def fixed_widths(table, widths):
+        table.autofit = False  # python-docx emits <w:tblLayout w:type="fixed"/>
         for row in table.rows:
-            for cell, w in zip(row.cells, cms):
-                cell.width = Cm(w)
+            for i, w in enumerate(widths):
+                if i < len(row.cells):
+                    row.cells[i].width = Twips(w)
 
-    def section(title):
-        h = doc.add_heading(title, 1)
-        h.paragraph_format.page_break_before = True
-        return h
+    def cellp(cell):
+        return cell.paragraphs[0]
+
+    def heading_band(num, text):
+        p = doc.add_paragraph()
+        spacing(p, before=18, after=3)
+        shade_par(p, NAVY)
+        run(p, f"  {num}   ", size=13.5, color="C8D3E4", bold=True)
+        run(p, text.upper(), size=13.5, color="FFFFFF", bold=True)
+
+    def subtitle(text):
+        p = doc.add_paragraph()
+        spacing(p, after=7)
+        run(p, text, size=9, color=GREY, italic=True)
 
     doc = Document()
-    for s in ("Title", "Heading 1", "Heading 2", "Heading 3"):
-        doc.styles[s].font.color.rgb = BLUE
-    doc.styles["Heading 1"].paragraph_format.space_before = Pt(14)
+    section = doc.sections[0]
+    section.page_width = Twips(11906)   # A4
+    section.page_height = Twips(16838)
+    section.top_margin = Twips(900)
+    section.bottom_margin = Twips(900)
+    section.left_margin = Twips(1100)
+    section.right_margin = Twips(1100)
+    doc.styles["Normal"].font.name = FONT
+    doc.styles["Normal"].font.size = Pt(10)
 
-    doc.add_heading(f"LKG Portfolio Sector Digest — {data['date']}", 0)
-    hdr = doc.add_paragraph()
-    hdr.add_run(
-        f"Run: {data.get('run_time', '')} · Sources scanned: "
-        f"{data.get('sources_scanned', '?')} · ").italic = True
-    d = hdr.add_run(f"DRAFT — for review by {data.get('reviewer', '[name]')}")
-    d.bold, d.font.color.rgb = True, RED
+    # ------------------------------------------------------- title block ----
+    sectors = data.get("sectors", [])
+    p = doc.add_paragraph()
+    spacing(p, after=2)
+    run(p, "LKG Portfolio Sector Digest", size=20, bold=True, color=NAVY)
+    p = doc.add_paragraph()
+    spacing(p, after=3)
+    run(p, "  ·  ".join([s["name"] for s in sectors] or ["LKG portfolio"]) +
+        f"  ·  {pretty_date(data['date'])}", size=10.5, color=GREY)
+    p = doc.add_paragraph()
+    spacing(p, after=2)
+    run(p, "DRAFT — NOT FOR DISTRIBUTION  ", size=9.5, bold=True, color=RED)
+    run(p, f"·  Run {data.get('run_time', '')}  ·  Sources scanned: "
+           f"{data.get('sources_scanned', '?')}  ·  For review by "
+           f"{data.get('reviewer', '[name]')}", size=9.5, color=GREY)
+    borders = OxmlElement("w:pBdr")
+    bottom = OxmlElement("w:bottom")
+    bottom.set(qn("w:val"), "single")
+    bottom.set(qn("w:sz"), "8")
+    bottom.set(qn("w:color"), NAVY)
+    borders.append(bottom)
+    p._p.get_or_add_pPr().insert_element_before(
+        borders, "w:shd", "w:tabs", "w:spacing", "w:ind", "w:jc", "w:rPr",
+        "w:sectPr", "w:pPrChange")
 
-    # At a glance — deterministic summary assembled from the gated data only
-    doc.add_heading("At a glance", 1)
-    owners = [f["owner"] for f in flags]
-    sevs = [f["severity"] for f in flags]
-    summ = doc.add_paragraph()
-    if flags:
-        groups = ", ".join(p for p in (
-            f"{owners.count('board')} for the Board" if "board" in owners else "",
-            f"{owners.count('QLC')} for QLC" if "QLC" in owners else "",
-            f"{owners.count('GM')} for the GM" if "GM" in owners else "") if p)
-        bold_numbers(summ,
-                     f"This digest nominates {len(flags)} item(s) for review — "
-                     f"{groups} ({sevs.count('high')} high / "
-                     f"{sevs.count('med')} med / {sevs.count('low')} low). "
-                     f"Top item: {flags[0]['headline']}. ")
-    else:
-        summ.add_run("No items passed the flag gate this run. "
-                     ).font.size = Pt(10)
-    bold_numbers(summ,
-                 f"The Watchlist holds {len(watchlist)} item(s)" +
-                 (f", {len(demoted)} demoted by the flag gate with the "
-                  f"failure named" if demoted else "") +
-                 ". Every flag is a nomination — nothing is distributed until "
-                 "the reviewer completes section 6.")
-
-    single_sector = len({f.get("sector") for f in flags}) <= 1
-    sector_name = data["sectors"][0]["name"] if data.get("sectors") else ""
-    section("1. Flagged items" +
-            (f" — {sector_name}" if single_sector and sector_name
-             and flags else ""))
-    leg = doc.add_paragraph()
-    r = leg.add_run("Severity: HIGH = act this week · MED = discuss at the "
-                    "next GM/board touchpoint · LOW = context. "
-                    "Grouped by who reviews.")
-    r.italic, r.font.size, r.font.color.rgb = True, Pt(9), GREY
+    # ------------------------------------------------------ 1 · flags ------
+    heading_band("1", "Flagged items")
+    subtitle("Everything that cleared the deterministic flag gate this run — "
+             "nominations for the named reviewer, not decisions.")
+    p = doc.add_paragraph()
+    spacing(p, after=7)
+    wrote_legend = False
+    for sev in ("high", "med", "low"):
+        if any(f["severity"] == sev for f in flags):
+            run(p, sev.upper(), size=8.5, bold=True, color=SEV_TXT[sev])
+            run(p, f" {SEV_LEGEND[sev]}    ", size=8.5, color=GREY)
+            wrote_legend = True
+    run(p, ("·    " if wrote_legend else "") +
+           "Audience: Board, GM or QLC    ·    All flags pending "
+           "reviewer decision (§6)", size=8.5, color=GREY)
     if not flags:
-        doc.add_paragraph("No items passed the flag gate this run.")
-    for owner, gtitle in (("board", "For the Board"),
-                          ("QLC", "For QLC — deal flow"),
-                          ("GM", "For the GM")):
-        group = [f for f in flags if f["owner"] == owner]
-        if not group:
-            continue
-        doc.add_heading(gtitle, 2)
-        for f in group:
-            head = doc.add_heading("", 3)
-            tag = head.add_run(f"[{f['severity'].upper()}]  ")
-            tag.font.color.rgb = SEV_COLOR[f["severity"]]
-            head.add_run(f["headline"])
-            t = doc.add_table(rows=0, cols=2)
-            t.style = "Light Grid Accent 1"
-            rows = [("Why this matters", f.get("implication", "")),
-                    ("Mechanism", f"{f.get('mechanism', '')} · "
-                                  f"{f.get('polarity', '')}")]
-            if not single_sector:
-                rows.append(("Sector", f.get("sector", "")))
-            for k, v in rows:
-                cells = t.add_row().cells
-                label_cell(cells[0], k)
-                bold_numbers(cells[1].paragraphs[0], v)
-            cells = t.add_row().cells
-            label_cell(cells[0], "Source")
-            source_block(cells[1].paragraphs[0], f["source_url"])
-            set_widths(t, (3.5, 12.5))
+        p = doc.add_paragraph()
+        run(p, "No items passed the flag gate this run.", size=10)
+    for f in flags:
+        sev = f["severity"]
+        t = doc.add_table(rows=4, cols=1)
+        table_borders(t)
+        fixed_widths(t, [PAGE])
+        c = t.rows[0].cells[0]
+        shade_cell(c, SEV_BG[sev])
+        cell_margins(c, top=80, bottom=80)
+        p = cellp(c)
+        run(p, f"{sev.upper()} · {AUD[f['owner']].upper()}   ", size=8.5,
+            color=SEV_TXT[sev], bold=True)
+        run(p, f["headline"], size=10.5, bold=True)
+        c = t.rows[1].cells[0]
+        cell_margins(c, top=70, bottom=20)
+        p = cellp(c)
+        run(p, f["polarity"].capitalize(), size=9, bold=True,
+            color=POL[f["polarity"]])
+        run(p, f"  ·  {f['mechanism']}", size=9, color=GREY)
+        c = t.rows[2].cells[0]
+        cell_margins(c)
+        p = cellp(c)
+        run(p, "Why this matters: ", size=9.5, bold=True, color=NAVY)
+        run(p, f["implication"], size=9.5)
+        c = t.rows[3].cells[0]
+        cell_margins(c, top=20, bottom=80)
+        p = cellp(c)
+        run(p, "Source: ", size=8.5, color=GREY)
+        hyperlink(p, source_label(f["source_url"]), f["source_url"])
+        gap = doc.add_paragraph()
+        spacing(gap, after=7)
 
-    section("2. Macro dashboard")
-    if data.get("macro"):
-        touched = {s for m in data["macro"]
-                   for s in m.get("sectors_touched", [])}
+    # ------------------------------------------------------ 2 · macro ------
+    heading_band("2", "Macro dashboard")
+    subtitle("Latest prints for the demand indicators the sector trades on.")
+    macro = data.get("macro", [])
+    if macro:
+        touched = {s for m in macro for s in m.get("sectors_touched", [])}
         multi = len(touched) > 1
-        cols = ("Indicator", "Delta") + \
-            (("Sectors touched",) if multi else ()) + ("Source",)
-        t = doc.add_table(rows=1, cols=len(cols))
-        t.style = "Light Grid Accent 1"
-        for i, h in enumerate(cols):
-            t.rows[0].cells[i].paragraphs[0].add_run(h).bold = True
-        for m in data["macro"]:
-            cells = t.add_row().cells
-            cells[0].paragraphs[0].add_run(
-                m.get("indicator", "")).font.size = Pt(10)
-            p = cells[1].paragraphs[0]
-            glyph = direction(m.get("delta", ""))
-            if glyph:
-                g = p.add_run(glyph + " ")
-                g.bold = True
-                g.font.color.rgb = RED if glyph == "▼" else GREEN
-            bold_numbers(p, m.get("delta", ""))
+        widths = [3900, 3306, 1900, 600] if multi else [4750, 4356, 600]
+        heads = ("Indicator", "Delta") + \
+            (("Sectors",) if multi else ()) + ("",)
+        t = doc.add_table(rows=1 + len(macro), cols=len(heads))
+        table_borders(t)
+        fixed_widths(t, widths)
+        for i, h in enumerate(heads):
+            c = t.rows[0].cells[i]
+            shade_cell(c, NAVY)
+            cell_margins(c, top=60, bottom=60, left=100, right=100)
+            run(cellp(c), h, size=9, bold=True, color="FFFFFF", caps=True)
+        for ri, m in enumerate(macro, start=1):
+            cells = t.rows[ri].cells
+            for c in cells:
+                if ri % 2 == 0:
+                    shade_cell(c, GREYBG)
+                cell_margins(c, top=50, bottom=50, left=100, right=100)
+            run(cellp(cells[0]), m.get("indicator", ""), size=9.5)
+            run(cellp(cells[1]), m.get("delta", ""), size=9.5)
             i = 2
             if multi:
-                cells[2].paragraphs[0].add_run(", ".join(
-                    m.get("sectors_touched", []))).font.size = Pt(10)
+                run(cellp(cells[2]),
+                    ", ".join(m.get("sectors_touched", [])), size=9.5)
                 i = 3
-            if m.get("source_url"):
-                source_block(cells[i].paragraphs[0], m["source_url"])
-        set_widths(t, (4.5, 6.0, 2.5, 3.0) if multi else (5.0, 7.0, 4.0))
+            p = cellp(cells[i])
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            d = direction(m.get("delta", ""))
+            if d:
+                run(p, "▲" if d == "up" else "▼", size=9.5,
+                    bold=True, color=GREEN if d == "up" else RED)
     else:
-        doc.add_paragraph("No macro deltas this run (deltas only — "
-                          "non-events are not reported).")
+        p = doc.add_paragraph()
+        run(p, "No macro deltas this run (deltas only — non-events are not "
+               "reported).", size=9.5, color=DARKGREY)
 
-    section("3. Sector sections")
-    for s in data.get("sectors", []):
-        doc.add_heading(f"{s['name']} ({s.get('status', 'active')})", 2)
+    # ----------------------------------------------- 3 · sector detail -----
+    active = [s for s in sectors if s.get("status") != "stub"]
+    band = "Sector detail"
+    if len(active) == 1 and len(sectors) == 1:
+        band += f" — {active[0]['name']}"
+    heading_band("3", band)
+    subtitle("Core section — the active sector in full. Each item states the "
+             "fact, why it matters to the portfolio, and its source.")
+    for s in sectors:
+        if len(sectors) > 1 or s.get("status") == "stub":
+            p = doc.add_paragraph()
+            spacing(p, before=4, after=3)
+            run(p, f"{s['name']} ({s.get('status', 'active')})", size=10.5,
+                bold=True, color=NAVY)
         if s.get("status") == "stub":
-            doc.add_paragraph(s.get(
-                "note", "not yet configured — sectors onboarded deliberately"))
+            p = doc.add_paragraph()
+            run(p, s.get("note", "not yet configured — sectors onboarded "
+                                 "deliberately"), size=9, color=GREY,
+                italic=True)
             continue
         for it in s.get("items", []):
             p = doc.add_paragraph(style="List Bullet")
-            aud = it.get("audience", "?")
-            r = p.add_run(f"[{'Board' if aud == 'board' else aud}]  ")
-            r.bold, r.font.size = True, Pt(10)
-            bold_numbers(p, f"{it['headline']}. ")
-            lbl = p.add_run("Why this matters: ")
-            lbl.italic, lbl.font.size, lbl.font.color.rgb = True, Pt(10), GREY
-            bold_numbers(p, f"{it.get('implication', '')} ")
+            spacing(p, after=1)
+            aud = AUD.get(it.get("audience", ""), it.get("audience", "?"))
+            run(p, f"[{aud}] ", size=9.5, bold=True,
+                color=AMBER if aud == "Board" else GREY)
+            run(p, it["headline"], size=9.5, bold=True)
+            p2 = doc.add_paragraph()
+            p2.paragraph_format.left_indent = Twips(360)
+            spacing(p2, after=6.5)
+            run(p2, "Why this matters: ", size=9.5, bold=True, color=NAVY)
+            run(p2, (it.get("implication", "") or "").rstrip() + "  ",
+                size=9.5)
             if it.get("source_url"):
-                hyperlink(p, f"({source_label(it['source_url'])})",
+                run(p2, "Source: ", size=8.5, color=GREY)
+                hyperlink(p2, source_label(it["source_url"]),
                           it["source_url"])
-                p.add_run().add_break()
-                r = p.add_run(it["source_url"])
-                r.font.size, r.font.color.rgb = Pt(7.5), GREY
 
-    section("4. Watchlist")
+    # -------------------------------------------------- 4 · watchlist ------
+    heading_band("4", "Watchlist — adjacent items at a glance")
+    subtitle("Comps, pending events and gate demotions monitored for "
+             "read-through. Nothing here is actionable this run — items "
+             "graduate to sections 1–3 when they become material.")
     for w in watchlist:
         p = doc.add_paragraph(style="List Bullet")
-        bold_numbers(p, w["headline"] + " ")
-        r = p.add_run(f"— {w.get('reason', '')} ")
-        r.italic, r.font.size, r.font.color.rgb = True, Pt(10), GREY
+        spacing(p, after=4.5)
+        status, detail = split_reason(w.get("reason", ""))
+        run(p, status + "  ", size=7.5, bold=True, color=GREY)
+        run(p, w["headline"] + (f" — {detail}" if detail else "") + "  ",
+            size=8.5, color=DARKGREY)
         if w.get("source_url"):
-            hyperlink(p, f"({source_label(w['source_url'])})", w["source_url"])
-            p.add_run().add_break()
-            r = p.add_run(w["source_url"])
-            r.font.size, r.font.color.rgb = Pt(7.5), GREY
+            hyperlink(p, source_label(w["source_url"]), w["source_url"],
+                      size=7.5)
     if not watchlist:
-        doc.add_paragraph("Empty.")
+        p = doc.add_paragraph()
+        run(p, "Empty.", size=9, color=GREY)
 
-    section("5. Assumptions appendix")
+    # ------------------------------------------------ 5 · assumptions ------
+    heading_band("5", "Assumptions & audit trail")
+    subtitle("How this run was produced — scope, source caps, blind spots, "
+             "and items dropped at the verification gate.")
     for a in data.get("assumptions", []):
         p = doc.add_paragraph(style="List Bullet")
-        r = p.add_run(a)
-        r.font.size, r.font.color.rgb = Pt(9), GREY
-        p.paragraph_format.space_after = Pt(2)
+        spacing(p, after=3.5)
+        run(p, a, size=8.5, color=GREY)
 
-    section("6. Reviewer decisions")
-    t = doc.add_table(rows=1, cols=3)
-    t.style = "Light Grid Accent 1"
+    # ------------------------------------------- 6 · reviewer decisions ----
+    heading_band("6", "Reviewer decisions")
+    subtitle("The human approval point — the agent stops here; only the "
+             "named reviewer completes this section.")
+    p = doc.add_paragraph()
+    spacing(p, after=5)
+    run(p, "No item in section 1 is distributed until its row below is "
+           "completed.", size=9.5, italic=True, color=RED)
+    t = doc.add_table(rows=1 + max(len(flags), 1), cols=3)
+    table_borders(t, inside=True)
+    fixed_widths(t, [4500, 2206, 3000])
     for i, h in enumerate(("Flag", "Decision", "Reviewer comment")):
-        t.rows[0].cells[i].paragraphs[0].add_run(h).bold = True
-    for f in flags:
-        cells = t.add_row().cells
-        p0 = cells[0].paragraphs[0]
-        tag = p0.add_run(f"[{f['severity'].upper()}] ")
-        tag.bold, tag.font.size = True, Pt(10)
-        tag.font.color.rgb = SEV_COLOR[f["severity"]]
-        p0.add_run(f["headline"]).font.size = Pt(10)
-        p1 = cells[1].paragraphs[0]
-        for j, opt in enumerate(("☐ Promote", "☐ Reject", "☐ Amend")):
-            r = p1.add_run(opt)
-            r.font.size = Pt(9)
-            if j < 2:
-                r.add_break()
+        c = t.rows[0].cells[i]
+        shade_cell(c, NAVY)
+        cell_margins(c, top=60, bottom=60, left=100, right=100)
+        run(cellp(c), h, size=9, bold=True, color="FFFFFF", caps=True)
     if not flags:
-        t.add_row().cells[0].paragraphs[0].add_run(
-            "(no flags passed the gate this run)").font.size = Pt(10)
-    set_widths(t, (8.8, 3.2, 4.0))
-    sig = doc.add_paragraph()
-    sig.add_run("Reviewed by: ____________________    Date: ____________"
-                ).bold = True
-    doc.add_paragraph("No item in section 1 is distributed until its row "
-                      "above is completed.")
+        c = t.rows[1].cells[0]
+        cell_margins(c, top=70, bottom=70, left=100, right=100)
+        run(cellp(c), "(no flags passed the gate this run)", size=9,
+            color=GREY)
+    for ri, f in enumerate(flags, start=1):
+        words = f["headline"].split()
+        short = " ".join(words[:9]) + ("…" if len(words) > 9 else "")
+        c = t.rows[ri].cells[0]
+        cell_margins(c, top=70, bottom=70, left=100, right=100)
+        p = cellp(c)
+        run(p, f"[{f['severity'].upper()} · {AUD[f['owner']]}]  ", size=8.5,
+            bold=True, color=SEV_TXT[f["severity"]])
+        run(p, short, size=9)
+        c = t.rows[ri].cells[1]
+        cell_margins(c, top=70, bottom=70, left=100, right=100)
+        p = cellp(c)
+        run(p, "☐ Promote", size=9)
+        for opt in ("☐ Reject", "☐ Amend"):
+            p = c.add_paragraph()
+            spacing(p)
+            run(p, opt, size=9)
+        cell_margins(t.rows[ri].cells[2], top=70, bottom=70, left=100,
+                     right=100)
+    p = doc.add_paragraph()
+    spacing(p, before=12)
+    run(p, "Reviewed by:  ______________________________        "
+           "Date:  ______________", size=10)
 
-    for p in doc.paragraphs:
-        if p.style.name.startswith(("Heading", "Title")):
-            continue
-        for r in p.runs:
-            if r.font.size is None:
-                r.font.size = Pt(10)
+    # --------------------------------------------- appendix · sources ------
+    # The one place full URLs appear — every body link resolves to an entry
+    # here. De-duplicated by URL, first-appearance order, tagged by section.
+    p = doc.add_paragraph()
+    p.add_run().add_break(WD_BREAK.PAGE)
+    heading_band("A", "Appendix — Sources")
+    subtitle("Every source cited in this digest, with full URLs for audit. "
+             "Body links resolve to the entries below.")
+    seen = {}
+
+    def collect(entries, tag, key="source_url"):
+        for e in entries:
+            u = e.get(key)
+            if not u:
+                continue
+            if u not in seen:
+                seen[u] = {"label": source_label(u), "sections": []}
+            if tag not in seen[u]["sections"]:
+                seen[u]["sections"].append(tag)
+
+    collect(flags, "§1")
+    collect(macro, "§2")
+    for s in sectors:
+        collect(s.get("items", []), "§3")
+    collect(watchlist, "§4")
+    for i, (url, meta) in enumerate(seen.items(), start=1):
+        p = doc.add_paragraph()
+        spacing(p, after=1)
+        run(p, f"{i}.  ", size=9, bold=True, color=NAVY)
+        run(p, meta["label"], size=9, bold=True)
+        run(p, "   (cited in " + ", ".join(meta["sections"]) + ")", size=8,
+            color=GREY)
+        p2 = doc.add_paragraph()
+        p2.paragraph_format.left_indent = Twips(280)
+        spacing(p2, after=6)
+        run(p2, url, size=8, color=GREY)
+
     doc.save(out)
     print(f"wrote {out}: {len(flags)} flag(s), {len(demoted)} demoted to "
           f"watchlist by gate, {len(data.get('sectors', []))} sector(s)")

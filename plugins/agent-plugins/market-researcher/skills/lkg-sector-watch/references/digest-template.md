@@ -6,31 +6,40 @@ the JSON below and re-enforces the flag gate at render time.
 
 ## Document structure
 
-**Header block** — date · run time · sources scanned count ·
-`DRAFT — for review by [name]` (rendered red), followed by an **At a glance**
-paragraph — flag count by audience and severity, top item, Watchlist count —
-assembled deterministically from the gated JSON, never model prose.
+**Title block** — title (navy), sector · pretty date subtitle, then a red
+`DRAFT — NOT FOR DISTRIBUTION` line carrying run time, sweep count, and the
+named reviewer, closed by a navy rule. Section headings render as navy bands
+(white uppercase) with a one-line grey italic subtitle each; colour is
+semantic only (red = high/risk, amber = med, green = opportunity/up-delta,
+grey = low/metadata).
 
-1. **Flagged items** — grouped **For the Board / For QLC / For the GM**,
-   severity-sorted within each group with colour-coded severity tags. Key
-   numbers render bold; every source renders as a hyperlinked label (originator
-   name for primaries — Cotality, ABS, ACCC — bare domain for secondaries)
-   with the full URL beneath it in small grey print, so citations survive on
-   paper and projector alike.
-2. **Macro dashboard** — rates, housing, sentiment. Each row: indicator, delta,
-   sectors touched. Deltas/threshold-crossings only.
-3. **Sector sections** — one per registry sector (today: bedding & furniture,
-   deep). Per item: headline, source, GM/board tag, one-line implication.
-4. **Watchlist** — items that failed the flag gate (with the missing field named)
-   or aren't yet material.
-5. **Assumptions appendix** — sources used and why; what substitutes for broker
-   research (public news + ASX announcements); any synthetic elements; known
-   blind spots without licensed connectors (CapIQ/FactSet); source-recency window.
-6. **Reviewer decisions** — one row per gated flag: shortened flag reference ·
-   ☐ Promote / ☐ Reject / ☐ Amend checkboxes · Reviewer comment (left blank),
-   then a signature block. The renderer emits this section unfilled by design —
-   only the named human completes it, and no item in section 1 is distributed
-   until its row is.
+1. **Flagged items** — severity legend, then one **flag card** per gated flag
+   (severity-sorted, board/QLC before GM): a severity-tinted band with
+   `SEV · AUDIENCE` badge and bold headline, a polarity · mechanism line, a
+   literal **Why this matters:** line, and a hyperlinked source label
+   (originator name for primaries — Cotality, ABS, ACCC — bare domain for
+   secondaries) with a trailing ↗. No raw URLs in the body — every full URL
+   lives in the Sources appendix.
+2. **Macro dashboard** — navy header, zebra rows, ▲/▼ direction column
+   (green/red). Deltas/threshold-crossings only.
+3. **Sector detail** — the core section: per item a bold fact line tagged
+   [Board]/[GM] plus an indented **Why this matters:** line and source link.
+   Stub sectors render their one-line note only.
+4. **Watchlist** — visually demoted (small, grey): uppercase status tag first
+   (FAILED GATE / CLASSIFIED NOISE / NOT YET MATERIAL / …), then the item and
+   source link. Items graduate to sections 1–3 when material.
+5. **Assumptions & audit trail** — small grey bullets: sources used and why,
+   broker-research substitute, synthetic elements, connector blind spots,
+   recency window. Present but visually subordinate.
+6. **Reviewer decisions** — red italic "no distribution until completed" line,
+   then one row per gated flag: `[SEV · Audience]` + ~9-word flag reference ·
+   ☐ Promote / ☐ Reject / ☐ Amend checkboxes · blank comment cell, and a
+   sign-off line. The renderer emits this section unfilled by design — only
+   the named human completes it.
+
+**Appendix A — Sources** (new page) — every URL cited anywhere in the digest,
+de-duplicated, in first-appearance order, tagged with the sections that cite
+it. Body links resolve here; this is where citations survive on paper.
 
 ## Digest JSON schema (input to build_digest.py)
 

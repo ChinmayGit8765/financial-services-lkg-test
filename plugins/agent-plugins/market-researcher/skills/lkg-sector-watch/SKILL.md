@@ -113,10 +113,10 @@ python3 scripts/build_digest.py digest.json "LKG-Sector-Digest-<YYYY-MM-DD>.docx
 (`py -3` on Windows if `python3` doesn't resolve; the script lives in this
 skill's `scripts/` directory — use its full path when running from elsewhere.)
 
-The document is titled **"LKG Portfolio Sector Digest — {date}"** and follows the
-structure in `references/digest-template.md`: At-a-glance summary → Flagged items
-(grouped For the Board / For QLC / For the GM) → Macro dashboard → Sector
-sections → Watchlist → Assumptions appendix → Reviewer decisions. If
+The document is titled **"LKG Portfolio Sector Digest"** and follows the
+structure in `references/digest-template.md`: title block → Flagged items (one
+severity-tinted card per flag) → Macro dashboard → Sector detail → Watchlist →
+Assumptions & audit trail → Reviewer decisions → Sources appendix. If
 `python-docx` is not available in the session, produce the same structure via the
 environment's Word / docx capability instead — structure is non-negotiable,
 tooling is not.
