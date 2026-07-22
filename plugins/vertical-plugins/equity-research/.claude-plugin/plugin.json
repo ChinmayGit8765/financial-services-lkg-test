@@ -1,6 +1,6 @@
 {
   "name": "equity-research",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Equity research tools: earnings analysis, initiating coverage reports, and research workflows",
   "author": {
     "name": "Anthropic FSI"

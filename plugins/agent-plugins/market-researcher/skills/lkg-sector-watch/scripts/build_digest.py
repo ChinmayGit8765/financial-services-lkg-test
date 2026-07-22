@@ -16,10 +16,16 @@ from pathlib import Path
 REQUIRED = ["headline", "source_url", "polarity", "mechanism",
             "implication", "owner", "severity"]
 HEADLINE_MAX = 140  # the schema's "one line", made checkable
+MECHANISMS = {  # the frozen taxonomy from references/sectors/ — no extensions mid-run
+    "housing-turnover", "rates-sentiment", "input-costs", "seasonality",
+    "franchise-risk", "ma-distress", "competitor-move",
+    "nbl-crossover", "nbl-distribution", "nbl-attention", "nbl-talent",
+}
 ENUMS = {
     "polarity": {"risk", "opportunity", "watch"},
     "owner": {"GM", "board", "QLC"},
     "severity": {"low", "med", "high"},
+    "mechanism": MECHANISMS,
 }
 SEV_ORDER = {"high": 0, "med": 1, "low": 2}
 OWNER_ORDER = {"board": 0, "QLC": 1, "GM": 2}
@@ -32,12 +38,15 @@ def gate(flags):
         missing = [k for k in REQUIRED if not str(f.get(k, "")).strip()]
         bad = [k for k, allowed in ENUMS.items()
                if f.get(k) and f[k] not in allowed]
-        over = len(str(f.get("headline", "")).strip()) > HEADLINE_MAX
-        if missing or bad or over:
+        head = str(f.get("headline", "")).strip()
+        over = len(head) > HEADLINE_MAX
+        multiline = "\n" in head
+        if missing or bad or over or multiline:
             reason = "failed gate: " + "; ".join(
                 (["missing " + ", ".join(missing)] if missing else []) +
                 [f"invalid {k}={f[k]!r}" for k in bad] +
-                ([f"headline over {HEADLINE_MAX} chars"] if over else []))
+                ([f"headline over {HEADLINE_MAX} chars"] if over else []) +
+                (["headline not one line"] if multiline else []))
             demoted.append({"headline": f.get("headline", "(no headline)"),
                             "source_url": f.get("source_url", ""),
                             "reason": reason})
