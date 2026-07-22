@@ -31,7 +31,7 @@ the JSON below and re-enforces the flag gate at render time.
   "sources_scanned": 7,
   "flags": [
     {
-      "headline": "one line",
+      "headline": "one line, max 140 chars (gate demotes longer)",
       "source_url": "https://…",
       "polarity": "risk | opportunity | watch",
       "mechanism": "a mechanism ID from a sector file",

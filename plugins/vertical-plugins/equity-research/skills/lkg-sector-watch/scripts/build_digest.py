@@ -15,6 +15,7 @@ from pathlib import Path
 
 REQUIRED = ["headline", "source_url", "polarity", "mechanism",
             "implication", "owner", "severity"]
+HEADLINE_MAX = 140  # the schema's "one line", made checkable
 ENUMS = {
     "polarity": {"risk", "opportunity", "watch"},
     "owner": {"GM", "board", "QLC"},
@@ -31,10 +32,12 @@ def gate(flags):
         missing = [k for k in REQUIRED if not str(f.get(k, "")).strip()]
         bad = [k for k, allowed in ENUMS.items()
                if f.get(k) and f[k] not in allowed]
-        if missing or bad:
+        over = len(str(f.get("headline", "")).strip()) > HEADLINE_MAX
+        if missing or bad or over:
             reason = "failed gate: " + "; ".join(
                 (["missing " + ", ".join(missing)] if missing else []) +
-                [f"invalid {k}={f[k]!r}" for k in bad])
+                [f"invalid {k}={f[k]!r}" for k in bad] +
+                ([f"headline over {HEADLINE_MAX} chars"] if over else []))
             demoted.append({"headline": f.get("headline", "(no headline)"),
                             "source_url": f.get("source_url", ""),
                             "reason": reason})

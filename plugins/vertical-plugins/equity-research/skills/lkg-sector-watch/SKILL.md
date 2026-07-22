@@ -60,7 +60,7 @@ drops to the Watchlist with the missing field named:
 
 ```yaml
 flag:
-  headline:      # one line
+  headline:      # one line, max 140 chars (renderer-enforced)
   source_url:    # required, real, must have been retrieved this run
   polarity:      # risk | opportunity | watch
   mechanism:     # a mechanism ID from the sector file that fired
