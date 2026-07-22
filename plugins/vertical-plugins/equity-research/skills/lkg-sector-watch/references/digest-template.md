@@ -13,9 +13,10 @@ assembled deterministically from the gated JSON, never model prose.
 
 1. **Flagged items** — grouped **For the Board / For QLC / For the GM**,
    severity-sorted within each group with colour-coded severity tags. Key
-   numbers render bold; the source renders as a hyperlinked label (originator
-   name for primaries — Cotality, ABS, ACCC — bare domain for secondaries),
-   never a raw URL.
+   numbers render bold; every source renders as a hyperlinked label (originator
+   name for primaries — Cotality, ABS, ACCC — bare domain for secondaries)
+   with the full URL beneath it in small grey print, so citations survive on
+   paper and projector alike.
 2. **Macro dashboard** — rates, housing, sentiment. Each row: indicator, delta,
    sectors touched. Deltas/threshold-crossings only.
 3. **Sector sections** — one per registry sector (today: bedding & furniture,

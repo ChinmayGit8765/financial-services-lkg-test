@@ -141,6 +141,15 @@ def main():
         r = cell.paragraphs[0].add_run(text)
         r.bold, r.font.size, r.font.color.rgb = True, Pt(9), GREY
 
+    def source_block(par, url):
+        # hyperlinked short label for the screen, full URL in small grey for
+        # print — a citation must survive on paper
+        hyperlink(par, source_label(url), url)
+        br = par.add_run()
+        br.add_break()
+        r = par.add_run(url)
+        r.font.size, r.font.color.rgb = Pt(7.5), GREY
+
     def set_widths(table, cms):
         # fixed layout so every table of a kind shares identical column lines
         table.autofit = False
@@ -231,15 +240,19 @@ def main():
                 bold_numbers(cells[1].paragraphs[0], v)
             cells = t.add_row().cells
             label_cell(cells[0], "Source")
-            hyperlink(cells[1].paragraphs[0],
-                      source_label(f["source_url"]), f["source_url"])
+            source_block(cells[1].paragraphs[0], f["source_url"])
             set_widths(t, (3.5, 12.5))
 
     section("2. Macro dashboard")
     if data.get("macro"):
-        t = doc.add_table(rows=1, cols=3)
+        touched = {s for m in data["macro"]
+                   for s in m.get("sectors_touched", [])}
+        multi = len(touched) > 1
+        cols = ("Indicator", "Delta") + \
+            (("Sectors touched",) if multi else ()) + ("Source",)
+        t = doc.add_table(rows=1, cols=len(cols))
         t.style = "Light Grid Accent 1"
-        for i, h in enumerate(("Indicator", "Delta", "Source")):
+        for i, h in enumerate(cols):
             t.rows[0].cells[i].paragraphs[0].add_run(h).bold = True
         for m in data["macro"]:
             cells = t.add_row().cells
@@ -252,10 +265,14 @@ def main():
                 g.bold = True
                 g.font.color.rgb = RED if glyph == "▼" else GREEN
             bold_numbers(p, m.get("delta", ""))
+            i = 2
+            if multi:
+                cells[2].paragraphs[0].add_run(", ".join(
+                    m.get("sectors_touched", []))).font.size = Pt(10)
+                i = 3
             if m.get("source_url"):
-                hyperlink(cells[2].paragraphs[0],
-                          source_label(m["source_url"]), m["source_url"])
-        set_widths(t, (5.5, 8.0, 2.5))
+                source_block(cells[i].paragraphs[0], m["source_url"])
+        set_widths(t, (4.5, 6.0, 2.5, 3.0) if multi else (5.0, 7.0, 4.0))
     else:
         doc.add_paragraph("No macro deltas this run (deltas only — "
                           "non-events are not reported).")
@@ -279,6 +296,9 @@ def main():
             if it.get("source_url"):
                 hyperlink(p, f"({source_label(it['source_url'])})",
                           it["source_url"])
+                p.add_run().add_break()
+                r = p.add_run(it["source_url"])
+                r.font.size, r.font.color.rgb = Pt(7.5), GREY
 
     section("4. Watchlist")
     for w in watchlist:
@@ -288,6 +308,9 @@ def main():
         r.italic, r.font.size, r.font.color.rgb = True, Pt(10), GREY
         if w.get("source_url"):
             hyperlink(p, f"({source_label(w['source_url'])})", w["source_url"])
+            p.add_run().add_break()
+            r = p.add_run(w["source_url"])
+            r.font.size, r.font.color.rgb = Pt(7.5), GREY
     if not watchlist:
         doc.add_paragraph("Empty.")
 
@@ -309,9 +332,7 @@ def main():
         tag = p0.add_run(f"[{f['severity'].upper()}] ")
         tag.bold, tag.font.size = True, Pt(10)
         tag.font.color.rgb = SEV_COLOR[f["severity"]]
-        words = f["headline"].split()
-        p0.add_run(" ".join(words[:8]) + (" …" if len(words) > 8 else "")
-                   ).font.size = Pt(10)
+        p0.add_run(f["headline"]).font.size = Pt(10)
         p1 = cells[1].paragraphs[0]
         for j, opt in enumerate(("☐ Promote", "☐ Reject", "☐ Amend")):
             r = p1.add_run(opt)
