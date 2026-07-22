@@ -58,6 +58,13 @@ fired — the **mechanism ID** of the encoded linkage that makes it relevant. Ma
 items are candidates **only on a delta or threshold-crossing** ("RBA cut 25bp"),
 never on a non-event ("RBA held").
 
+**The "why this matters" line is written for its reader, not for an analyst.**
+One short sentence in plain language a busy GM or director takes in on first
+read: what happened to their business and what to do with it. "Fewer people
+moving house means fewer mattress purchases — volume input for store planning"
+is right; "transaction-driven demand headwinds portend adverse volume mix" is
+not. No jargon, no hedging, the consequence first.
+
 ### Step 4: Classify audience
 
 Hand the candidate items as JSON to the `audience-classifier` subagent. It returns
@@ -76,7 +83,7 @@ flag:
   source_url:    # required, real, must have been retrieved this run
   polarity:      # risk | opportunity | watch
   mechanism:     # a mechanism ID from the sector file that fired
-  implication:   # one line, "why this matters"
+  implication:   # one line, "why this matters" — plain language, see below
   owner:         # GM | board | QLC
   severity:      # low | med | high
 ```

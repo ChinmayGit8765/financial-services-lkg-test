@@ -45,7 +45,7 @@ assembled deterministically from the gated JSON, never model prose.
       "source_url": "https://…",
       "polarity": "risk | opportunity | watch",
       "mechanism": "a mechanism ID from a sector file",
-      "implication": "one line — why this matters",
+      "implication": "one line — why this matters, in plain language its reader takes in on first read",
       "owner": "GM | board | QLC",
       "severity": "low | med | high",
       "sector": "a sector id from the registry (today: bedding-furniture)"

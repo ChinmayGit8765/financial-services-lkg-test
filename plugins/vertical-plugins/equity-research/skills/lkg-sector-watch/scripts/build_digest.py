@@ -142,10 +142,19 @@ def main():
         r.bold, r.font.size, r.font.color.rgb = True, Pt(9), GREY
 
     def set_widths(table, cms):
+        # fixed layout so every table of a kind shares identical column lines
         table.autofit = False
+        layout = OxmlElement("w:tblLayout")
+        layout.set(qn("w:type"), "fixed")
+        table._tbl.tblPr.append(layout)
         for row in table.rows:
             for cell, w in zip(row.cells, cms):
                 cell.width = Cm(w)
+
+    def section(title):
+        h = doc.add_heading(title, 1)
+        h.paragraph_format.page_break_before = True
+        return h
 
     doc = Document()
     for s in ("Title", "Heading 1", "Heading 2", "Heading 3"):
@@ -187,9 +196,9 @@ def main():
 
     single_sector = len({f.get("sector") for f in flags}) <= 1
     sector_name = data["sectors"][0]["name"] if data.get("sectors") else ""
-    doc.add_heading("1. Flagged items" +
-                    (f" — {sector_name}" if single_sector and sector_name
-                     and flags else ""), 1)
+    section("1. Flagged items" +
+            (f" — {sector_name}" if single_sector and sector_name
+             and flags else ""))
     leg = doc.add_paragraph()
     r = leg.add_run("Severity: HIGH = act this week · MED = discuss at the "
                     "next GM/board touchpoint · LOW = context. "
@@ -211,7 +220,7 @@ def main():
             head.add_run(f["headline"])
             t = doc.add_table(rows=0, cols=2)
             t.style = "Light Grid Accent 1"
-            rows = [("Why it matters", f.get("implication", "")),
+            rows = [("Why this matters", f.get("implication", "")),
                     ("Mechanism", f"{f.get('mechanism', '')} · "
                                   f"{f.get('polarity', '')}")]
             if not single_sector:
@@ -226,7 +235,7 @@ def main():
                       source_label(f["source_url"]), f["source_url"])
             set_widths(t, (3.5, 12.5))
 
-    doc.add_heading("2. Macro dashboard", 1)
+    section("2. Macro dashboard")
     if data.get("macro"):
         t = doc.add_table(rows=1, cols=3)
         t.style = "Light Grid Accent 1"
@@ -251,7 +260,7 @@ def main():
         doc.add_paragraph("No macro deltas this run (deltas only — "
                           "non-events are not reported).")
 
-    doc.add_heading("3. Sector sections", 1)
+    section("3. Sector sections")
     for s in data.get("sectors", []):
         doc.add_heading(f"{s['name']} ({s.get('status', 'active')})", 2)
         if s.get("status") == "stub":
@@ -263,12 +272,15 @@ def main():
             aud = it.get("audience", "?")
             r = p.add_run(f"[{'Board' if aud == 'board' else aud}]  ")
             r.bold, r.font.size = True, Pt(10)
-            bold_numbers(p, f"{it['headline']} — {it.get('implication', '')} ")
+            bold_numbers(p, f"{it['headline']}. ")
+            lbl = p.add_run("Why this matters: ")
+            lbl.italic, lbl.font.size, lbl.font.color.rgb = True, Pt(10), GREY
+            bold_numbers(p, f"{it.get('implication', '')} ")
             if it.get("source_url"):
                 hyperlink(p, f"({source_label(it['source_url'])})",
                           it["source_url"])
 
-    doc.add_heading("4. Watchlist", 1)
+    section("4. Watchlist")
     for w in watchlist:
         p = doc.add_paragraph(style="List Bullet")
         bold_numbers(p, w["headline"] + " ")
@@ -279,14 +291,14 @@ def main():
     if not watchlist:
         doc.add_paragraph("Empty.")
 
-    doc.add_heading("5. Assumptions appendix", 1)
+    section("5. Assumptions appendix")
     for a in data.get("assumptions", []):
         p = doc.add_paragraph(style="List Bullet")
         r = p.add_run(a)
         r.font.size, r.font.color.rgb = Pt(9), GREY
         p.paragraph_format.space_after = Pt(2)
 
-    doc.add_heading("6. Reviewer decisions", 1)
+    section("6. Reviewer decisions")
     t = doc.add_table(rows=1, cols=3)
     t.style = "Light Grid Accent 1"
     for i, h in enumerate(("Flag", "Decision", "Reviewer comment")):
