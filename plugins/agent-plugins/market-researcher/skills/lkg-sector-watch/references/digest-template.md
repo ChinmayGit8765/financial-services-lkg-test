@@ -13,8 +13,8 @@ the JSON below and re-enforces the flag gate at render time.
    desc, then owner board/QLC before GM). Full flag schema rendered per item.
 2. **Macro dashboard** — rates, housing, sentiment. Each row: indicator, delta,
    sectors touched. Deltas/threshold-crossings only.
-3. **Sector sections** — bedding (deep), NBL (light), Brand Collective (stub
-   line only). Per item: headline, source, GM/board tag, one-line implication.
+3. **Sector sections** — one per registry sector (today: bedding & furniture,
+   deep). Per item: headline, source, GM/board tag, one-line implication.
 4. **Watchlist** — items that failed the flag gate (with the missing field named)
    or aren't yet material.
 5. **Assumptions appendix** — sources used and why; what substitutes for broker
@@ -43,7 +43,7 @@ the JSON below and re-enforces the flag gate at render time.
       "implication": "one line — why this matters",
       "owner": "GM | board | QLC",
       "severity": "low | med | high",
-      "sector": "bedding-furniture | nbl | brand-collective"
+      "sector": "a sector id from the registry (today: bedding-furniture)"
     }
   ],
   "macro": [

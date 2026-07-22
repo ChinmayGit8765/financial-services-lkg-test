@@ -1,13 +1,14 @@
 ---
 name: lkg-sector-watch
-description: Produce the LKG Portfolio Sector Digest — a daily scan of public sources across sectors LKG operates in (bedding/furniture retail via Hypnos Group, NBL, Brand Collective), with a deterministic flag gate that nominates items for GM, board, or QLC review. Triggers on "sector digest", "portfolio watch", "daily digest", "sector watch", "scan the sector", "LKG digest", or "what moved in bedding".
+description: Produce the LKG Portfolio Sector Digest — a daily scan of public sources across Australian bedding & furniture retail (LKG exposure via Hypnos Group — Snooze, FutureSleep, G&G Furniture), with a deterministic flag gate that nominates items for GM, board, or QLC review. Triggers on "sector digest", "portfolio watch", "daily digest", "sector watch", "scan the sector", "LKG digest", or "what moved in bedding".
 ---
 
 # LKG Sector Watch
 
-Daily digest for the LKG portfolio. The agent scans public sources, applies each
-sector's encoded linkages, and **nominates** flags. A named human reviewer promotes
-them — nothing in this skill's output is a decision, a forecast, or a send.
+Daily digest for the LKG portfolio, centred on its primary sector. The agent scans
+public sources, applies the sector's encoded linkages, and **nominates** flags. A
+named human reviewer promotes them — nothing in this skill's output is a decision,
+a forecast, or a send.
 
 ## Sector registry
 
@@ -19,8 +20,11 @@ it encodes no internal LKG/QLC data.
 | Sector file | Weighting | Depth |
 |---|---|---|
 | `references/sectors/bedding-furniture.md` | risk-weighted | PRIMARY — full scan |
-| `references/sectors/nbl.md` | opportunity-weighted | SECONDARY — light, 3–4 sources |
-| `references/sectors/brand-collective.md` | — | STUB — not yet configured |
+
+Next candidates: NBL (opportunity-weighted), Brand Collective (apparel/footwear)
+— deliberately not yet onboarded. A sector goes live only when its player map,
+mechanism IDs, and source menu have been reviewed, so the flag gate never runs
+on an unvetted taxonomy.
 
 ## Workflow
 
@@ -32,9 +36,9 @@ context the agent *applies* — never forecasts it makes.
 
 ### Step 2: Scan sources
 
-- **Cap the scan at 5–8 sources total across all sectors** so runtime stays
-  predictable. Take the PRIMARY sector's spine first (ASX announcements of listed
-  names), then macro, then SECONDARY.
+- **Cap the scan at 5–8 sources** so runtime stays predictable. The whole budget
+  goes to the primary sector: take its spine first (ASX announcements of listed
+  names), then sector news on the player map, then macro.
 - Public data only: ASX filings, news, regulator releases, public broker
   commentary. No paywalled or employer data.
 - Record the source menu swept and the run window in the assumptions appendix;

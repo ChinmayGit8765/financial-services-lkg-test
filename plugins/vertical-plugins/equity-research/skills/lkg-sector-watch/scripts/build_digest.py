@@ -19,7 +19,6 @@ HEADLINE_MAX = 140  # the schema's "one line", made checkable
 MECHANISMS = {  # the frozen taxonomy from references/sectors/ — no extensions mid-run
     "housing-turnover", "rates-sentiment", "input-costs", "seasonality",
     "franchise-risk", "ma-distress", "competitor-move",
-    "nbl-crossover", "nbl-distribution", "nbl-attention", "nbl-talent",
 }
 ENUMS = {
     "polarity": {"risk", "opportunity", "watch"},

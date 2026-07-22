@@ -53,5 +53,7 @@ is expected to grow this way: audit output, close the gap in code, not prose.
 ## Deliberately not built
 
 Managed Agent deployment (talk-only — see DEPLOYMENT.md), pptx/email output,
-additional sectors beyond the registry (Brand Collective is a stub by design),
-forecasts or probabilities anywhere in output.
+additional sectors beyond bedding/furniture — NBL and Brand Collective were
+considered, prototyped, and cut before submission to maximise depth in the
+primary sector; the registry pattern (one file = one sector) is the extension
+path — and forecasts or probabilities anywhere in output.

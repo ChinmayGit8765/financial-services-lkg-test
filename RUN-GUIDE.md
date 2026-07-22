@@ -48,10 +48,11 @@ The `market-researcher` agent enters digest mode and `lkg-sector-watch` drives.
 A full run is **~25–30 min scan-to-draft** (recorded 22 Jul run). You will see,
 in order:
 
-1. **Sector registry load** — bedding/furniture (PRIMARY, full scan), NBL
-   (SECONDARY, light), Brand Collective (stub, one line only).
-2. **Source sweep** — capped at 5–8 sources total; ASX announcements of the
-   listed names first, then macro, then SECONDARY.
+1. **Sector registry load** — Australian bedding & furniture retail (PRIMARY,
+   full scan); NBL and Brand Collective are named next candidates, deliberately
+   not yet onboarded.
+2. **Source sweep** — capped at 5–8 sources, all on the primary sector; ASX
+   announcements of the listed names first, then sector news, then macro.
 3. **Candidate extraction** — each item needs a source URL and, to matter, a
    mechanism ID from the sector file. Macro items only on a delta.
 4. **Audience classification** — one batched `audience-classifier` subagent

@@ -53,8 +53,8 @@ half-adapted: a partial port would look deployable without being it.
   predictable unit priced against the analyst-hour a day the same scan takes by
   hand. Per-run figures come from session cost logs (kept per the brief's
   reimbursement note).
-- Cost scales with the sector registry (one file = one scan lane), so adding
-  Brand Collective is a priced decision, not scope creep.
+- Cost scales with the sector registry (one file = one scan lane), so onboarding
+  a next sector (NBL, Brand Collective) is a priced decision, not scope creep.
 
 ## Human-in-the-loop model
 
@@ -79,6 +79,8 @@ without passing the gate *and* a person.
   the M365 add-in: the deterministic flag gate runs at render time, and a
   live-document editing flow would bypass it. The add-in remains the right
   surface for the template's interactive primer documents.
-- Brand Collective sector file is a stub until its taxonomy is reviewed —
-  sectors are onboarded deliberately so the gate never runs on unvetted
-  mechanism IDs.
+- Single-sector registry by design: NBL and Brand Collective were considered,
+  prototyped, and cut before submission to maximise depth in bedding/furniture.
+  Sectors are onboarded deliberately — player map, mechanism IDs, and source
+  menu reviewed first — so the gate never runs on unvetted mechanism IDs; the
+  registry pattern is the extension path.
