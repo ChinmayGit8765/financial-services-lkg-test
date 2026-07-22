@@ -95,15 +95,18 @@ skill's `scripts/` directory — use its full path when running from elsewhere.)
 
 The document is titled **"LKG Portfolio Sector Digest — {date}"** and follows the
 structure in `references/digest-template.md`: Flagged items → Macro dashboard →
-Sector sections → Watchlist → Assumptions appendix. If `python-docx` is not
-available in the session, produce the same structure via the environment's Word /
-docx capability instead — structure is non-negotiable, tooling is not.
+Sector sections → Watchlist → Assumptions appendix → Reviewer decisions. If
+`python-docx` is not available in the session, produce the same structure via the
+environment's Word / docx capability instead — structure is non-negotiable,
+tooling is not.
 
 ### Step 7: Stop for human review
 
-The header carries `DRAFT — for review by [name]`. Present the file path and the
-flag count, then stop. Every flag is a nomination; a human promotes it. Never
-email, distribute, or schedule anything.
+The header carries `DRAFT — for review by [name]`, and the document ends with the
+Reviewer decisions table — one empty Promote / Reject / Amend row per flag that
+only the named human completes. Present the file path and the flag count, then
+stop. Every flag is a nomination; a human promotes it by completing its row.
+Never email, distribute, or schedule anything.
 
 ## Important Notes
 

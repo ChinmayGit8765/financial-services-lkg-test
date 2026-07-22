@@ -69,13 +69,15 @@ def main():
 
     try:
         from docx import Document
-        from docx.shared import Pt
+        from docx.shared import Pt, RGBColor
     except ImportError:
         sys.exit("python-docx not installed (pip install python-docx). "
                  "Gate result: %d flag(s) passed, %d demoted." %
                  (len(flags), len(demoted)))
 
     doc = Document()
+    for style in ("Title", "Heading 1", "Heading 2"):
+        doc.styles[style].font.color.rgb = RGBColor(0x1F, 0x4E, 0x79)
     doc.add_heading(f"LKG Portfolio Sector Digest — {data['date']}", 0)
     hdr = doc.add_paragraph()
     hdr.add_run(
@@ -137,6 +139,23 @@ def main():
     for a in data.get("assumptions", []):
         doc.add_paragraph(a, style="List Bullet")
 
+    doc.add_heading("6. Reviewer decisions", 1)
+    t = doc.add_table(rows=1, cols=3)
+    for i, h in enumerate(("Flag", "Decision (Promote / Reject / Amend)",
+                           "Reviewer comment")):
+        t.rows[0].cells[i].text = h
+    for f in flags:
+        t.add_row().cells[0].text = f["headline"]
+    if not flags:
+        t.add_row().cells[0].text = "(no flags passed the gate this run)"
+    sig = doc.add_paragraph()
+    sig.add_run("Reviewed by: ____________________    Date: ____________"
+                ).bold = True
+    doc.add_paragraph("No item in section 1 is distributed until its row "
+                      "above is completed.")
+
+    for tbl in doc.tables:
+        tbl.style = "Light Grid Accent 1"
     for p in doc.paragraphs:
         for r in p.runs:
             if r.font.size is None:

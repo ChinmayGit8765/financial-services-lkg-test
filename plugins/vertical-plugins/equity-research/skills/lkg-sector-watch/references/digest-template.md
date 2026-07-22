@@ -20,6 +20,11 @@ the JSON below and re-enforces the flag gate at render time.
 5. **Assumptions appendix** — sources used and why; what substitutes for broker
    research (public news + ASX announcements); any synthetic elements; known
    blind spots without licensed connectors (CapIQ/FactSet); source-recency window.
+6. **Reviewer decisions** — one row per gated flag: Flag · Decision
+   (Promote / Reject / Amend, left blank) · Reviewer comment (left blank),
+   then a signature block. The renderer emits this section empty by design —
+   only the named human completes it, and no item in section 1 is distributed
+   until its row is.
 
 ## Digest JSON schema (input to build_digest.py)
 
