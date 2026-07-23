@@ -287,6 +287,7 @@ def main():
 
     # ------------------------------------------------------- title block ----
     sectors = data.get("sectors", [])
+    macro = data.get("macro", [])
     p = doc.add_paragraph()
     spacing(p, after=2)
     run(p, "LKG Portfolio Sector Digest", size=20, bold=True, color=NAVY)
@@ -309,6 +310,55 @@ def main():
     p._p.get_or_add_pPr().insert_element_before(
         borders, "w:shd", "w:tabs", "w:spacing", "w:ind", "w:jc", "w:rPr",
         "w:sectPr", "w:pPrChange")
+
+    # ----------------------------------------------- executive summary -----
+    heading_band("ES", "Executive summary")
+    subtitle("The whole digest on one page — narrative first, then the "
+             "numbers. The outline is compiled from the gated content below "
+             "and cannot drift from it.")
+    for b in data.get("executive_summary", []):
+        p = doc.add_paragraph(style="List Bullet")
+        spacing(p, after=3)
+        run(p, b, size=9.5)
+    outline = []
+    if flags:
+        owners = [f["owner"] for f in flags]
+        sevs = [f["severity"] for f in flags]
+        aud_bits = ", ".join(x for x in (
+            f"{owners.count('board')} Board" if "board" in owners else "",
+            f"{owners.count('QLC')} QLC" if "QLC" in owners else "",
+            f"{owners.count('GM')} GM" if "GM" in owners else "") if x)
+        sev_bits = ", ".join(f"{sevs.count(s)} {s}"
+                             for s in ("high", "med", "low") if s in sevs)
+        outline.append(f"§1 — {len(flags)} item(s) flagged ({aud_bits}; "
+                       f"{sev_bits}). Top item: {flags[0]['headline']}.")
+    else:
+        outline.append("§1 — no items passed the flag gate this run.")
+    if macro:
+        ups = sum(1 for m in macro
+                  if direction(m.get("delta", "")) == "up")
+        downs = sum(1 for m in macro
+                    if direction(m.get("delta", "")) == "down")
+        outline.append(f"§2 — {len(macro)} macro indicator(s): "
+                       f"{downs} moving down, {ups} up.")
+    else:
+        outline.append("§2 — no macro deltas this run (deltas only).")
+    n_items = sum(len(s.get("items", [])) for s in sectors)
+    if len(sectors) == 1:
+        outline.append(f"§3 — {n_items} item(s) for {sectors[0]['name']}.")
+    else:
+        outline.append(f"§3 — {n_items} item(s) across "
+                       f"{len(sectors)} sector(s).")
+    outline.append(f"§4 — {len(watchlist)} watchlist item(s)" +
+                   (f", {len(demoted)} demoted by the flag gate with the "
+                    f"failure named" if demoted else "") + ".")
+    outline.append("§6 — action required: the named reviewer completes one "
+                   "Promote / Reject / Amend row per flag; nothing is "
+                   "distributed until then.")
+    for text in outline:
+        p = doc.add_paragraph(style="List Bullet")
+        spacing(p, after=2)
+        run(p, text, size=8.5, color=DARKGREY)
 
     # ------------------------------------------------------ 1 · flags ------
     heading_band("1", "Flagged items")
@@ -362,7 +412,6 @@ def main():
     # ------------------------------------------------------ 2 · macro ------
     heading_band("2", "Macro dashboard")
     subtitle("Latest prints for the demand indicators the sector trades on.")
-    macro = data.get("macro", [])
     if macro:
         touched = {s for m in macro for s in m.get("sectors_touched", [])}
         multi = len(touched) > 1

@@ -106,6 +106,13 @@ every flag and demotes any incomplete one to the Watchlist at render time.
 
 Write the digest JSON (schema in `references/digest-template.md`), then render:
 
+Include `executive_summary`: 3–5 bullets in plain language for an executive
+who reads nothing else — what's going on in the sector this run, what needs
+action, what was left out and why. Summarize only content that is in the
+digest; introduce nothing new. The renderer appends a per-section outline
+(§1–§6 with counts and the top item) compiled from the gated JSON, so the
+summary can never disagree with the gate.
+
 ```
 python3 scripts/build_digest.py digest.json "LKG-Sector-Digest-<YYYY-MM-DD>.docx"
 ```
@@ -114,9 +121,10 @@ python3 scripts/build_digest.py digest.json "LKG-Sector-Digest-<YYYY-MM-DD>.docx
 skill's `scripts/` directory — use its full path when running from elsewhere.)
 
 The document is titled **"LKG Portfolio Sector Digest"** and follows the
-structure in `references/digest-template.md`: title block → Flagged items (one
-severity-tinted card per flag) → Macro dashboard → Sector detail → Watchlist →
-Assumptions & audit trail → Reviewer decisions → Sources appendix. If
+structure in `references/digest-template.md`: title block → Executive summary
+→ Flagged items (one severity-tinted card per flag) → Macro dashboard →
+Sector detail → Watchlist → Assumptions & audit trail → Reviewer decisions →
+Sources appendix. If
 `python-docx` is not available in the session, produce the same structure via the
 environment's Word / docx capability instead — structure is non-negotiable,
 tooling is not.

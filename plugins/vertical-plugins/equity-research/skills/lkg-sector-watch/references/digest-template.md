@@ -13,6 +13,13 @@ named reviewer, closed by a navy rule. Section headings render as navy bands
 semantic only (red = high/risk, amber = med, green = opportunity/up-delta,
 grey = low/metadata).
 
+**Executive summary (ES)** — the whole digest on one page: the agent's 3–5
+plain-language `executive_summary` bullets (what's going on, what needs
+action, what was excluded — nothing not already in the digest), followed by a
+deterministic per-section outline (§1–§6 with counts and the top item)
+compiled from the gated JSON at render time, so it can never drift from the
+gate result.
+
 1. **Flagged items** — severity legend, then one **flag card** per gated flag
    (severity-sorted, board/QLC before GM): a severity-tinted band with
    `SEV · AUDIENCE` badge and bold headline, a polarity · mechanism line, a
@@ -49,6 +56,9 @@ it. Body links resolve here; this is where citations survive on paper.
   "run_time": "HH:MM AEST",
   "reviewer": "Reviewer Name",
   "sources_scanned": 7,
+  "executive_summary": [
+    "3-5 plain-language bullets: what's going on, what needs action, what was excluded — summarize only content that is in the digest"
+  ],
   "flags": [
     {
       "headline": "one line, max 140 chars (gate demotes longer)",
